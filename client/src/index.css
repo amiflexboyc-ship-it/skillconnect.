@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-main: #0B1120;
+    --card-bg: #1E293B;
+    --btn-primary: #3B82F6;
+    --accent-gold: #FACC15;
+    --text-white: #FFFFFF;
+    --text-muted: #94A3B8;
+  }
+
+  body {
+    background-color: #0B1120;
+    color: #FFFFFF;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0B1120;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1E293B;
+    border-radius: 4px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3B82F6;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-white bg-blue-500 hover:bg-blue-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-blue-500/25 border border-blue-400/30;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-slate-950 bg-yellow-400 hover:bg-yellow-300 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-yellow-500/30;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-white bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition-all duration-200 border border-slate-700 hover:border-slate-600;
+  }
+
+  .card-premium {
+    @apply bg-[#1E293B] border border-slate-700/60 rounded-2xl p-6 transition-all duration-300 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/5 backdrop-blur-md;
+  }
+
+  .gold-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400/10 text-yellow-400 border border-yellow-400/30;
+  }
+
+  .blue-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30;
+  }
+
+  .glass-header {
+    @apply bg-[#0B1120]/85 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-50;
+  }
+}
+
+/* Animations */
+@keyframes pulseSlow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 8s ease-in-out infinite;
+}

@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: skillconnect-api
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        value: https://skillconnect.com,https://www.skillconnect.com,http://localhost:5173
+      - key: ADMIN_EMAIL
+        value: amiflexboyc@gmail.com
+      - key: ADMIN_WHATSAPP
+        value: "09077108987"
+      - key: ADMIN_NAME
+        value: Waris (AmiFlexboy)
