@@ -8,19 +8,28 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState(null);
+  const [devCode, setDevCode] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setUnverifiedEmail(null);
     setLoading(true);
     const res = await login(email, password);
     setLoading(false);
     if (res.success) {
       navigate('/dashboard');
     } else {
-      setError(res.message || 'Invalid credentials');
+      if (res.requiresVerification) {
+        setUnverifiedEmail(res.email || email);
+        setDevCode(res.devVerificationCode || null);
+        setError(res.message || 'Please verify your email before logging in.');
+      } else {
+        setError(res.message || 'Invalid credentials');
+      }
     }
   };
 
@@ -96,8 +105,26 @@ const Login = () => {
         {/* Main Form */}
         <div className="card-premium">
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
-              {error}
+            <div className="mb-4 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs space-y-2">
+              <p>{error}</p>
+              {unverifiedEmail && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate('/verify-email', {
+                      state: {
+                        email: unverifiedEmail,
+                        devVerificationCode: devCode,
+                        message: 'Enter the 6-digit code sent to your email to verify and log in.',
+                      },
+                    })
+                  }
+                  className="w-full mt-2 py-2 px-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-md shadow-blue-500/20"
+                >
+                  <span>Enter Verification Code Now</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           )}
 

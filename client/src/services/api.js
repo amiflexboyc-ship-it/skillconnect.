@@ -28,6 +28,24 @@ export const api = {
     return res.json();
   },
 
+  async verifyCode(email, code) {
+    const res = await fetch(`${BASE_URL}/auth/verify-code`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ email, code }),
+    });
+    return res.json();
+  },
+
+  async resendCode(email) {
+    const res = await fetch(`${BASE_URL}/auth/resend-code`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ email }),
+    });
+    return res.json();
+  },
+
   async getMe() {
     const res = await fetch(`${BASE_URL}/auth/me`, {
       headers: getHeaders(),

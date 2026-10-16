@@ -41,7 +41,13 @@ const Register = () => {
 
     setLoading(false);
     if (res.success) {
-      navigate('/dashboard');
+      navigate('/verify-email', {
+        state: {
+          email: formData.email,
+          devVerificationCode: res.devVerificationCode,
+          message: res.message || 'Account created! Please check your email for the 6-digit verification code.',
+        },
+      });
     } else {
       setError(res.message || 'Registration failed');
     }

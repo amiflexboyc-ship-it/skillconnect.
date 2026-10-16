@@ -22,13 +22,14 @@ export const defaultUser = {
   successRate: 100,
   walletBalance: 4950.00,
   isVerified: true,
+  isEmailVerified: true,
   isTopRated: true,
 };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('skillconnect_user');
-    return saved ? JSON.parse(saved) : defaultUser;
+    return saved ? JSON.parse(saved) : null;
   });
   const [loading, setLoading] = useState(false);
 
@@ -47,14 +48,20 @@ export const AuthProvider = ({ children }) => {
       if (res.success && res.user) {
         setUser(res.user);
         if (res.token) localStorage.setItem('skillconnect_token', res.token);
-        return { success: true };
+        return { success: true, user: res.user };
       }
-      return { success: false, message: res.message || 'Login failed' };
+      return {
+        success: false,
+        requiresVerification: res.requiresVerification || false,
+        email: res.email || email,
+        devVerificationCode: res.devVerificationCode,
+        message: res.message || 'Login failed',
+      };
     } catch (err) {
-      // Offline fallback
-      if (email.toLowerCase().includes('waris') || email.toLowerCase().includes('amiflex')) {
+      // Demo fallback if offline
+      if (email && (email.toLowerCase().includes('waris') || email.toLowerCase().includes('amiflex'))) {
         setUser(defaultUser);
-        return { success: true };
+        return { success: true, user: defaultUser };
       }
       return { success: false, message: err.message };
     } finally {
@@ -66,16 +73,46 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await api.register(userData);
-      if (res.success && res.user) {
-        setUser(res.user);
-        if (res.token) localStorage.setItem('skillconnect_token', res.token);
-        return { success: true };
+      if (res.success) {
+        return {
+          success: true,
+          requiresVerification: res.requiresVerification !== false,
+          email: res.email || userData.email,
+          devVerificationCode: res.devVerificationCode,
+          message: res.message,
+        };
       }
       return { success: false, message: res.message || 'Registration failed' };
     } catch (err) {
       return { success: false, message: err.message };
     } finally {
       setLoading(false);
+    }
+  };
+
+  const verifyEmail = async (email, code) => {
+    setLoading(true);
+    try {
+      const res = await api.verifyCode(email, code);
+      if (res.success && res.user) {
+        setUser(res.user);
+        if (res.token) localStorage.setItem('skillconnect_token', res.token);
+        return { success: true, message: res.message, user: res.user };
+      }
+      return { success: false, message: res.message || 'Verification failed' };
+    } catch (err) {
+      return { success: false, message: err.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendVerificationCode = async (email) => {
+    try {
+      const res = await api.resendCode(email);
+      return res;
+    } catch (err) {
+      return { success: false, message: err.message };
     }
   };
 
@@ -93,7 +130,6 @@ export const AuthProvider = ({ children }) => {
         setUser(res.user);
         return { success: true };
       }
-      // Local state update
       setUser(prev => ({ ...prev, ...profileData }));
       return { success: true };
     } catch (err) {
@@ -107,7 +143,20 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = user && (user.role === 'admin' || user.email === 'amiflexboyc@gmail.com');
 
   return (
-    <AuthContext.Provider value={{ user, setUser, login, register, logout, updateProfile, isAdmin, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        login,
+        register,
+        verifyEmail,
+        resendVerificationCode,
+        logout,
+        updateProfile,
+        isAdmin,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

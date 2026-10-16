@@ -8,7 +8,7 @@
 2. [Step 2: Setup MongoDB Atlas (Cloud Database)](#step-2-setup-mongodb-atlas-cloud-database)
 3. [Step 3: Deploy Backend API on Render](#step-3-deploy-backend-api-on-render)
 4. [Step 4: Deploy Frontend on Vercel](#step-4-deploy-frontend-on-vercel)
-5. [Step 5: Connect Custom Domain `skillconnect.com`](#step-5-connect-custom-domain-skillconnectcom)
+5. [Step 5: Connect Custom Domain `skillconnec.com`](#step-5-connect-custom-domain-skillconnectcom)
 
 ---
 

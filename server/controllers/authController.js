@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { getDbStatus } = require('../config/db');
+const { sendVerificationCodeEmail, sendWelcomeEmail } = require('../services/emailService');
 
 // In-memory fallback store
 let fallbackUsers = [
@@ -25,6 +26,7 @@ let fallbackUsers = [
     successRate: 100,
     walletBalance: 4950.00,
     isVerified: true,
+    isEmailVerified: true,
     isTopRated: true,
   },
   {
@@ -47,6 +49,7 @@ let fallbackUsers = [
     successRate: 98,
     walletBalance: 12500.00,
     isVerified: true,
+    isEmailVerified: true,
     isTopRated: false,
   },
   {
@@ -69,6 +72,7 @@ let fallbackUsers = [
     successRate: 97,
     walletBalance: 1980.00,
     isVerified: true,
+    isEmailVerified: true,
     isTopRated: true,
   }
 ];
@@ -79,7 +83,11 @@ const generateToken = (id, email, role) => {
   });
 };
 
-// @desc    Register a new user
+const generate6DigitCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// @desc    Register a new user & send email verification code
 // @route   POST /api/auth/register
 const register = async (req, res) => {
   try {
@@ -89,10 +97,40 @@ const register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide all required fields' });
     }
 
+    const verificationCode = generate6DigitCode();
+    const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
     if (getDbStatus()) {
-      const userExists = await User.findOne({ email });
-      if (userExists) {
-        return res.status(400).json({ success: false, message: 'User already exists with this email' });
+      const existingUser = await User.findOne({ email });
+
+      if (existingUser) {
+        if (existingUser.isEmailVerified) {
+          return res.status(400).json({ success: false, message: 'User already exists with this email. Please log in.' });
+        }
+
+        // Unverified user trying to re-register: update credentials & verification code
+        const salt = await bcrypt.genSalt(10);
+        existingUser.name = name;
+        existingUser.password = await bcrypt.hash(password, salt);
+        existingUser.role = role || existingUser.role;
+        existingUser.title = title || existingUser.title;
+        existingUser.skills = skills || existingUser.skills;
+        existingUser.phone = phone || existingUser.phone;
+        existingUser.whatsapp = whatsapp || existingUser.whatsapp;
+        existingUser.location = location || existingUser.location;
+        existingUser.verificationCode = verificationCode;
+        existingUser.verificationCodeExpires = verificationCodeExpires;
+        await existingUser.save();
+
+        await sendVerificationCodeEmail({ email, name, code: verificationCode });
+
+        return res.status(200).json({
+          success: true,
+          requiresVerification: true,
+          email: existingUser.email,
+          message: 'Verification code resent! Please check your email to complete registration.',
+          devVerificationCode: process.env.NODE_ENV !== 'production' ? verificationCode : undefined,
+        });
       }
 
       const salt = await bcrypt.genSalt(10);
@@ -108,28 +146,40 @@ const register = async (req, res) => {
         phone: phone || '',
         whatsapp: whatsapp || phone || '',
         location: location || 'Remote',
+        isVerified: false,
+        isEmailVerified: false,
+        verificationCode,
+        verificationCodeExpires,
       });
+
+      await sendVerificationCodeEmail({ email, name, code: verificationCode });
 
       return res.status(201).json({
         success: true,
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          title: user.title,
-          avatar: user.avatar,
-          rating: user.rating,
-          phone: user.phone,
-          whatsapp: user.whatsapp,
-        },
-        token: generateToken(user._id, user.email, user.role),
+        requiresVerification: true,
+        email: user.email,
+        message: 'Account created! A 6-digit verification code has been sent to your email.',
+        devVerificationCode: process.env.NODE_ENV !== 'production' ? verificationCode : undefined,
       });
     } else {
       // Memory fallback
-      const exists = fallbackUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-      if (exists) {
-        return res.status(400).json({ success: false, message: 'User already exists with this email' });
+      const existing = fallbackUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (existing) {
+        if (existing.isEmailVerified) {
+          return res.status(400).json({ success: false, message: 'User already exists with this email. Please log in.' });
+        }
+        existing.name = name;
+        existing.passwordHash = password;
+        existing.verificationCode = verificationCode;
+        existing.verificationCodeExpires = verificationCodeExpires;
+        await sendVerificationCodeEmail({ email, name, code: verificationCode });
+        return res.status(200).json({
+          success: true,
+          requiresVerification: true,
+          email: existing.email,
+          message: 'Verification code resent! Please check your email.',
+          devVerificationCode: process.env.NODE_ENV !== 'production' ? verificationCode : undefined,
+        });
       }
 
       const newUser = {
@@ -151,19 +201,203 @@ const register = async (req, res) => {
         completedJobs: 0,
         successRate: 100,
         walletBalance: 0.00,
-        isVerified: true,
+        isVerified: false,
+        isEmailVerified: false,
+        verificationCode,
+        verificationCodeExpires,
         isTopRated: false,
       };
       fallbackUsers.push(newUser);
 
+      await sendVerificationCodeEmail({ email, name, code: verificationCode });
+
       return res.status(201).json({
         success: true,
-        user: newUser,
-        token: generateToken(newUser._id, newUser.email, newUser.role),
+        requiresVerification: true,
+        email: newUser.email,
+        message: 'Account created! A 6-digit verification code has been sent to your email.',
+        devVerificationCode: process.env.NODE_ENV !== 'production' ? verificationCode : undefined,
       });
     }
   } catch (error) {
     console.error('Register error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Verify email using 6-digit code
+// @route   POST /api/auth/verify-code
+const verifyCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ success: false, message: 'Email and 6-digit verification code are required' });
+    }
+
+    const trimmedCode = code.toString().trim();
+
+    if (getDbStatus()) {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'Account not found with this email' });
+      }
+
+      if (user.isEmailVerified) {
+        return res.json({
+          success: true,
+          message: 'Your email is already verified. You can log in.',
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            title: user.title,
+            avatar: user.avatar,
+            isEmailVerified: true,
+            isVerified: true,
+          },
+          token: generateToken(user._id, user.email, user.role),
+        });
+      }
+
+      // Check code match
+      if (!user.verificationCode || user.verificationCode !== trimmedCode) {
+        return res.status(400).json({ success: false, message: 'Invalid verification code. Please check and try again.' });
+      }
+
+      // Check expiration
+      if (user.verificationCodeExpires && new Date() > new Date(user.verificationCodeExpires)) {
+        return res.status(400).json({ success: false, message: 'Verification code has expired. Please request a new code.' });
+      }
+
+      // Mark verified
+      user.isEmailVerified = true;
+      user.isVerified = true;
+      user.verificationCode = null;
+      user.verificationCodeExpires = null;
+      await user.save();
+
+      await sendWelcomeEmail(user);
+
+      return res.json({
+        success: true,
+        message: 'Email successfully verified! Welcome to SkillConnect.',
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          title: user.title,
+          avatar: user.avatar,
+          rating: user.rating,
+          phone: user.phone,
+          whatsapp: user.whatsapp,
+          isEmailVerified: true,
+          isVerified: true,
+        },
+        token: generateToken(user._id, user.email, user.role),
+      });
+    } else {
+      // Memory fallback
+      const user = fallbackUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'Account not found with this email' });
+      }
+
+      if (user.isEmailVerified) {
+        return res.json({
+          success: true,
+          message: 'Your email is already verified.',
+          user,
+          token: generateToken(user._id, user.email, user.role),
+        });
+      }
+
+      if (!user.verificationCode || user.verificationCode !== trimmedCode) {
+        return res.status(400).json({ success: false, message: 'Invalid verification code. Please check and try again.' });
+      }
+
+      if (user.verificationCodeExpires && new Date() > new Date(user.verificationCodeExpires)) {
+        return res.status(400).json({ success: false, message: 'Verification code has expired. Please request a new code.' });
+      }
+
+      user.isEmailVerified = true;
+      user.isVerified = true;
+      user.verificationCode = null;
+      user.verificationCodeExpires = null;
+
+      await sendWelcomeEmail(user);
+
+      return res.json({
+        success: true,
+        message: 'Email successfully verified! Welcome to SkillConnect.',
+        user,
+        token: generateToken(user._id, user.email, user.role),
+      });
+    }
+  } catch (error) {
+    console.error('Verification error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Resend verification code
+// @route   POST /api/auth/resend-code
+const resendCode = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email address is required' });
+    }
+
+    const verificationCode = generate6DigitCode();
+    const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000);
+
+    if (getDbStatus()) {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'No account found with this email.' });
+      }
+
+      if (user.isEmailVerified) {
+        return res.status(400).json({ success: false, message: 'This email is already verified. You can log in directly.' });
+      }
+
+      user.verificationCode = verificationCode;
+      user.verificationCodeExpires = verificationCodeExpires;
+      await user.save();
+
+      await sendVerificationCodeEmail({ email, name: user.name, code: verificationCode });
+
+      return res.json({
+        success: true,
+        message: 'A new 6-digit verification code has been sent to your email.',
+        devVerificationCode: process.env.NODE_ENV !== 'production' ? verificationCode : undefined,
+      });
+    } else {
+      const user = fallbackUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'No account found with this email.' });
+      }
+
+      if (user.isEmailVerified) {
+        return res.status(400).json({ success: false, message: 'This email is already verified. You can log in directly.' });
+      }
+
+      user.verificationCode = verificationCode;
+      user.verificationCodeExpires = verificationCodeExpires;
+
+      await sendVerificationCodeEmail({ email, name: user.name, code: verificationCode });
+
+      return res.json({
+        success: true,
+        message: 'A new 6-digit verification code has been sent to your email.',
+        devVerificationCode: process.env.NODE_ENV !== 'production' ? verificationCode : undefined,
+      });
+    }
+  } catch (error) {
+    console.error('Resend code error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -189,6 +423,24 @@ const login = async (req, res) => {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
 
+      // Check if email is verified
+      if (user.isEmailVerified === false) {
+        const verificationCode = generate6DigitCode();
+        user.verificationCode = verificationCode;
+        user.verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000);
+        await user.save();
+
+        await sendVerificationCodeEmail({ email: user.email, name: user.name, code: verificationCode });
+
+        return res.status(403).json({
+          success: false,
+          requiresVerification: true,
+          email: user.email,
+          message: 'Your email is not verified yet. We just sent a 6-digit verification code to your inbox.',
+          devVerificationCode: process.env.NODE_ENV !== 'production' ? verificationCode : undefined,
+        });
+      }
+
       return res.json({
         success: true,
         user: {
@@ -205,6 +457,8 @@ const login = async (req, res) => {
           location: user.location,
           skills: user.skills,
           walletBalance: user.walletBalance,
+          isEmailVerified: true,
+          isVerified: user.isVerified,
         },
         token: generateToken(user._id, user.email, user.role),
       });
@@ -222,6 +476,22 @@ const login = async (req, res) => {
           });
         }
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      }
+
+      // Verify email check for registered non-demo users
+      if (user.isEmailVerified === false) {
+        const verificationCode = generate6DigitCode();
+        user.verificationCode = verificationCode;
+        user.verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000);
+        await sendVerificationCodeEmail({ email: user.email, name: user.name, code: verificationCode });
+
+        return res.status(403).json({
+          success: false,
+          requiresVerification: true,
+          email: user.email,
+          message: 'Your email is not verified yet. A 6-digit code has been sent to your email.',
+          devVerificationCode: process.env.NODE_ENV !== 'production' ? verificationCode : undefined,
+        });
       }
 
       return res.json({
@@ -257,6 +527,8 @@ const getMe = async (req, res) => {
 
 module.exports = {
   register,
+  verifyCode,
+  resendCode,
   login,
   getMe,
   fallbackUsers,
