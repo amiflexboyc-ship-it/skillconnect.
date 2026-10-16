@@ -1,4 +1,15 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:5000/api';
+    }
+  }
+  return 'https://skillconnect-api.onrender.com/api';
+};
+
+const BASE_URL = getBaseUrl();
 
 const getHeaders = () => {
   const token = localStorage.getItem('skillconnect_token');
