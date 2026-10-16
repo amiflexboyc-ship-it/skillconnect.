@@ -52,8 +52,9 @@ const Login = () => {
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 mb-2">
-            <Lock className="w-6 h-6" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-semibold mb-1 shadow-sm">
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+            <span>Sign in to access your SkillConnect workspace</span>
           </div>
           <h2 className="text-3xl font-extrabold text-white">Welcome Back</h2>
           <p className="text-xs text-slate-400">

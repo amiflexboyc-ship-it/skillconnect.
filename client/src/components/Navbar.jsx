@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -44,7 +45,7 @@ const Navbar = () => {
       <div className="max-w-5xl mx-auto bg-[#FAF7F2] text-slate-900 rounded-full px-5 sm:px-7 py-2.5 shadow-2xl shadow-black/40 border border-[#E8E2D8] flex items-center justify-between pointer-events-auto backdrop-blur-md transition-all">
         
         {/* Left: Brand with Sunburst Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+        <Link to={user ? "/" : "/register"} className="flex items-center gap-2.5 group shrink-0">
           {/* Radiant Sunburst Emblem matching image */}
           <div className="w-7 h-7 flex items-center justify-center text-slate-950 group-hover:rotate-45 transition-transform duration-500">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
@@ -65,24 +66,31 @@ const Navbar = () => {
         </Link>
 
         {/* Center: Navigation Links with subtle Chevrons */}
-        <nav className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              className={`text-xs font-semibold flex items-center gap-1 transition-colors group ${
-                isActive(link.path)
-                  ? 'text-slate-950 font-bold'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-            >
-              <span>{link.name}</span>
-              {link.hasDropdown && (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-transform group-hover:translate-y-0.5" />
-              )}
-            </Link>
-          ))}
-        </nav>
+        {user ? (
+          <nav className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`text-xs font-semibold flex items-center gap-1 transition-colors group ${
+                  isActive(link.path)
+                    ? 'text-slate-950 font-bold'
+                    : 'text-slate-600 hover:text-slate-950'
+                }`}
+              >
+                <span>{link.name}</span>
+                {link.hasDropdown && (
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-transform group-hover:translate-y-0.5" />
+                )}
+              </Link>
+            ))}
+          </nav>
+        ) : (
+          <div className="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-200/70 px-3.5 py-1.5 rounded-full border border-slate-300/60 shadow-inner">
+            <Lock className="w-3.5 h-3.5 text-slate-900" />
+            <span>Sign up required to access marketplace</span>
+          </div>
+        )}
 
         {/* Right: Globe, Divider, Log In, and Get Started Pill */}
         <div className="hidden sm:flex items-center gap-4">
@@ -187,16 +195,26 @@ const Navbar = () => {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden max-w-5xl mx-auto mt-2 bg-[#FAF7F2] text-slate-900 rounded-3xl p-5 shadow-2xl border border-[#E8E2D8] pointer-events-auto space-y-3 animate-in fade-in">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              onClick={() => setMobileMenuOpen(false)}
-              className="block text-xs font-semibold text-slate-700 hover:text-black py-2 px-3 rounded-xl hover:bg-slate-100"
-            >
-              {link.name}
-            </Link>
-          ))}
+          {user ? (
+            navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-xs font-semibold text-slate-700 hover:text-black py-2 px-3 rounded-xl hover:bg-slate-100"
+              >
+                {link.name}
+              </Link>
+            ))
+          ) : (
+            <div className="p-3.5 rounded-2xl bg-slate-100 border border-slate-200 text-center space-y-1">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-900">
+                <Lock className="w-3.5 h-3.5" />
+                <span>Members Only Platform</span>
+              </div>
+              <p className="text-[11px] text-slate-500">Sign up or log in to unlock jobs, talent, and features.</p>
+            </div>
+          )}
           <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
             {user ? (
               <div className="flex items-center justify-between w-full">

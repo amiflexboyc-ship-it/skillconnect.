@@ -58,9 +58,13 @@ const Register = () => {
       <div className="max-w-xl w-full space-y-6">
         
         <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-yellow-300 text-xs font-semibold mb-1 shadow-sm">
+            <Lock className="w-3.5 h-3.5 text-yellow-400" />
+            <span>Sign up required to access SkillConnect</span>
+          </div>
           <h2 className="text-3xl font-extrabold text-white">Join SkillConnect</h2>
           <p className="text-xs text-slate-400">
-            Create your account to hire top talent or offer your professional services globally
+            Create your account to unlock full access to top talent, global jobs, and marketplace tools
           </p>
         </div>
 
