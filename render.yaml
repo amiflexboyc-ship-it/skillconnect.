@@ -16,7 +16,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        value: https://skillconnect.com,https://www.skillconnect.com,http://localhost:5173
+        value: https://skillconnect.com,https://www.skillconnect.com,https://skillconnec.com,https://www.skillconnec.com,http://localhost:5173
       - key: ADMIN_EMAIL
         value: amiflexboyc@gmail.com
       - key: ADMIN_WHATSAPP
