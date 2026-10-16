@@ -146,7 +146,7 @@ const ManageUsers = () => {
                       </td>
 
                       <td className="p-4">
-                        <p className="text-yellow-400 font-bold">⭐ {u.rating || 5.0}</p>
+                        <p className="text-yellow-400 font-bold">{u.rating || 5.0}</p>
                         <p className="text-[11px] text-emerald-400 font-medium">100% Success</p>
                       </td>
 
@@ -159,7 +159,7 @@ const ManageUsers = () => {
                               : 'bg-slate-800 text-slate-300 border-slate-700'
                           }`}
                         >
-                          {u.isVerified ? '✓ Verified' : 'Verify'}
+                          {u.isVerified ? 'Verified' : 'Verify'}
                         </button>
                       </td>
                     </tr>

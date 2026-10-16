@@ -109,7 +109,7 @@ async function runTests() {
     process.exit(1);
   }
 
-  console.log('\n🎉 ALL AUTH & EMAIL VERIFICATION TESTS PASSED SUCCESSFULLY!');
+  console.log('\nALL AUTH & EMAIL VERIFICATION TESTS PASSED SUCCESSFULLY!');
   process.exit(0);
 }
 

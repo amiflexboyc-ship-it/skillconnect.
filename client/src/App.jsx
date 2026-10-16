@@ -40,7 +40,7 @@ function App() {
       <Router>
         <div className="min-h-screen flex flex-col bg-[#0B1120] text-white">
           <Navbar />
-          <div className="flex-1">
+          <div className="flex-1 pt-20 sm:pt-24">
             <Routes>
               {/* User Routes */}
               <Route path="/" element={<Home />} />

@@ -1,4 +1,4 @@
-# 🚀 SkillConnect — Premier Freelance & Talent Marketplace
+# SkillConnect — Premier Freelance & Talent Marketplace
 
 > **The premier digital network connecting visionary founders with vetted, world-class engineers, designers, and specialists.**
 > **Founder & Lead Full-Stack Architect:** Waris (AmiFlexboy)
@@ -7,7 +7,7 @@
 
 ---
 
-## 🎨 Theme & Color Palette
+## Theme & Color Palette
 
 - **Background:** `#0B1120` (Obsidian Navy)
 - **Cards:** `#1E293B` (Slate 800)
@@ -18,7 +18,7 @@
 
 ---
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 skillconnect/
@@ -134,7 +134,7 @@ skillconnect/
 
 ---
 
-## ⚡ Quick Start Guide
+## Quick Start Guide
 
 ### 1. Start the Backend API (Port 5000)
 ```bash
@@ -152,7 +152,7 @@ npm run dev
 
 ---
 
-## 👑 Lead Developer & Contact
+## Lead Developer & Contact
 
 - **Name:** Waris (AmiFlexboy)
 - **Role:** Founder & Senior Full-Stack Engineer

@@ -212,8 +212,8 @@ const FreelancerProfile = () => {
               ${current?.hourlyRate || 65}<span className="text-xs font-normal text-slate-400">/hr</span>
             </p>
             <div className="pt-2 border-t border-slate-800 text-xs text-slate-400 space-y-1">
-              <p>✓ 40 hrs/week capacity</p>
-              <p>✓ Response time: &lt; 1hr</p>
+              <p>40 hrs/week capacity</p>
+              <p>Response time: &lt; 1hr</p>
             </div>
           </div>
         </div>

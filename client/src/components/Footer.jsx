@@ -104,7 +104,7 @@ const Footer = () => {
             </p>
             {subscribed ? (
               <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium">
-                ✓ Thanks for subscribing!
+                Thanks for subscribing!
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="space-y-2">

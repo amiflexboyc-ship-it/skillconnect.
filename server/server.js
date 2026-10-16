@@ -59,10 +59,10 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`🚀 SkillConnect API Server is running on port ${PORT}`);
-  console.log(`🌐 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`👑 Lead Developer / Admin: Waris (AmiFlexboy)`);
-  console.log(`📧 Contact Email: amiflexboyc@gmail.com`);
-  console.log(`📱 WhatsApp: 09077108987`);
+  console.log(`SkillConnect API Server is running on port ${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/api/health`);
+  console.log(`Lead Developer / Admin: Waris (AmiFlexboy)`);
+  console.log(`Contact Email: amiflexboyc@gmail.com`);
+  console.log(`WhatsApp: 09077108987`);
   console.log(`======================================================\n`);
 });

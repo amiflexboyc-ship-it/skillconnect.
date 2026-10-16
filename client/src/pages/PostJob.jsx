@@ -306,8 +306,8 @@ const PostJob = () => {
             </div>
 
             <div className="pt-3 border-t border-slate-700/60 text-[11px] text-slate-400 space-y-1">
-              <p>✓ 100% Escrow Protection Guaranteed</p>
-              <p>✓ Instant candidate alerts</p>
+              <p>100% Escrow Protection Guaranteed</p>
+              <p>Instant candidate alerts</p>
             </div>
           </div>
         </div>

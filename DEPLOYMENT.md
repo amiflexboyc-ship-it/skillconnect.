@@ -1,9 +1,9 @@
-# 🌐 SkillConnect Production Deployment Guide
+# SkillConnect Production Deployment Guide
 ### Complete Setup: GitHub • Vercel • Render • MongoDB Atlas • Custom Domain `skillconnect.com`
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 1. [Step 1: Push Code to GitHub](#step-1-push-code-to-github)
 2. [Step 2: Setup MongoDB Atlas (Cloud Database)](#step-2-setup-mongodb-atlas-cloud-database)
 3. [Step 3: Deploy Backend API on Render](#step-3-deploy-backend-api-on-render)
@@ -139,7 +139,7 @@ Add the following DNS records:
 
 ---
 
-## ✅ Post-Deployment Verification
+##  Post-Deployment Verification
 
 1. Visit **`https://skillconnect.com`** in your browser.
 2. Verify:

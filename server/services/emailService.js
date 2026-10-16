@@ -35,10 +35,10 @@ const getTransporter = () => {
  */
 const sendVerificationCodeEmail = async ({ email, name, code }) => {
   console.log(`\n======================================================`);
-  console.log(`📧 [SkillConnect Email Verification Code]`);
-  console.log(`👤 Recipient: ${name} <${email}>`);
-  console.log(`🔑 Verification Code: ${code}`);
-  console.log(`⏱️  Expires in: 15 minutes`);
+  console.log(`[SkillConnect Email Verification Code]`);
+  console.log(`Recipient: ${name} <${email}>`);
+  console.log(`Verification Code: ${code}`);
+  console.log(`Expires in: 15 minutes`);
   console.log(`======================================================\n`);
 
   const transporter = getTransporter();
@@ -82,7 +82,7 @@ const sendVerificationCodeEmail = async ({ email, name, code }) => {
             </p>
             <div class="code-box">
               <div class="code">${code}</div>
-              <div class="code-expiry">⏳ This code expires in <strong>15 minutes</strong></div>
+              <div class="code-expiry">This code expires in <strong>15 minutes</strong></div>
             </div>
             <p class="message" style="font-size: 12px; color: #64748b;">
               If you didn't create an account on SkillConnect, you can safely ignore this email. Never share this code with anyone.
